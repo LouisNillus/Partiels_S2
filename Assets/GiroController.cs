@@ -15,6 +15,8 @@ public class GiroController : MonoBehaviour
 
     public RectTransform reticule;
 
+    public Enemy carriedEnemy;
+    public Transform grabPoint;
 
     public Camera cam;
     bool aimFlipFlop;
@@ -56,6 +58,9 @@ public class GiroController : MonoBehaviour
         Debug.DrawRay(cam.transform.position, cam.transform.forward * 10f, Color.yellow);
 
         loadText.text = shotLoad.ToString("F2");
+
+        reticule.GetComponent<Image>().sprite = carriedEnemy != null ? throwReticule : shootReticule;
+        
     }
 
     public void Aim()
@@ -100,7 +105,7 @@ public class GiroController : MonoBehaviour
     public float minTimeToBeConsideredAsLoad;
     [Range(0.5f,5f)]
     public float timeToFullyLoadShot;
-     [Range(0f,10f)]
+    [Range(0f,10f)]
     public float maxShootForce;
     public void LoadShot()
     {
@@ -127,6 +132,8 @@ public class GiroController : MonoBehaviour
         Vector3 origin = go.transform.position;
         Vector3 destination = cam.transform.position + (cam.transform.forward * 10).NoisyVector(aimFlipFlop ? 0.05f : 0.3f);
 
+        bul.fireDir = (bul.transform.position - destination).normalized;
+
         go.GetComponent<Bullet>().damages += Mathf.Lerp(0, maxShootForce, loadProgression);
         bul.SetColor(Color.Lerp(Color.white, Color.blue, loadProgression));
 
@@ -136,6 +143,7 @@ public class GiroController : MonoBehaviour
             t += Time.deltaTime;
             yield return null;
         }
+
 
 
 

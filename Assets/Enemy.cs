@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class Enemy : MonoBehaviour
 {
@@ -11,30 +12,67 @@ public class Enemy : MonoBehaviour
 
     [Range(1,50)]
     public float hp;
+    float initialHp;
 
     public GameObject UIInfos;
+    GiroController giro;
 
-    // Start is called before the first frame update
+    Color initialColor;
     void Start()
     {
-        
+        giro = GiroController.instance;
+        initialHp = hp;        
+
+        initialColor = GetComponent<MeshRenderer>().material.GetColor("_Color");
     }
 
     public ParticleSystem death;
 
-    // Update is called once per frame
+    // Update
     void Update()
     {
-        Debug.DrawLine(this.transform.position, GiroController.instance.cam.transform.position, Color.blue);
+        Debug.DrawLine(this.transform.position, giro.cam.transform.position, Color.blue);
 
-        
-        UIInfos.SetActive(Vector3.Dot((this.transform.position - GiroController.instance.cam.transform.position).normalized, GiroController.instance.cam.transform.forward) > GameManager.instance.enemiesDetectionThreshold ? true : false);
+        UIInfos.SetActive(Vector3.Dot((this.transform.position - giro.cam.transform.position).normalized, giro.cam.transform.forward) > GameManager.instance.enemiesDetectionThreshold ? true : false);
     }
 
     private void OnDestroy()
     {
         Instantiate(death, this.transform.position, Quaternion.identity).Play();
     }
+
+    public void TakeDamages(float amount)
+    {
+        hp -= amount;
+
+        if (hp <= 0)
+        {
+            reversed = true;
+            Methods.SetMaterialColor(this.gameObject, Color.red);
+            StopAllCoroutines();
+            StartCoroutine(ReversedCooldown());
+        }
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if(reversed && other.CompareTag("Player") && giro.)
+        {
+            giro.carriedEnemy = this;
+            GetComponent<BoxCollider>().enabled = false;
+            GetComponent<SphereCollider>().enabled = false;
+            this.transform.parent = giro.grabPoint;
+            this.transform.localPosition = Vector3.zero;
+        }
+    }
+
+    public IEnumerator ReversedCooldown()
+    {
+        yield return new WaitForSeconds(reversedCooldown);
+        reversed = false;
+        hp = initialHp;
+        Methods.SetMaterialColor(this.gameObject, initialColor);
+    }
+
 
 
 }

@@ -23,9 +23,12 @@ public class Bullet : MonoBehaviour
             Debug.DrawRay(this.transform.position, fireDir, Color.red, 10f);
             other.transform.DOMove((origin - fireDir).ChangeY(origin.y), 0.25f);
 
+            GetComponent<Collider>().enabled = false;
 
-            other.GetComponent<Enemy>().hp -= damages;
-            Instantiate(enemyTouched, other.transform.position, Quaternion.identity).Play();
+            other.GetComponent<Enemy>().TakeDamages(damages);
+            ParticleSystem ps = Instantiate(enemyTouched, other.transform);
+            ps.transform.localPosition = Vector3.zero;
+            ps.Play();
         }
     }
 
